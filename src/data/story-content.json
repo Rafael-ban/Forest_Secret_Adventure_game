@@ -1,0 +1,206 @@
+{
+  "intro": {
+    "kicker": "黎明前的最后一夜",
+    "title": "雾正在带走姐姐",
+    "body": [
+      "十年前，村庄为了熬过寒冬，砍伤了秘境深处的心树。从那以后，森林开始用迷雾讨还被夺走的东西。",
+      "今夜，姐姐带着赎罪的红布条独自走进林中。天亮之前，如果你不能找到她，姐姐和村庄都会被这场旧债吞没。"
+    ],
+    "buttonLabel": "进入秘境",
+    "imageKey": "intro"
+  },
+  "scenes": {
+    "scene1": {
+      "title": "场景1：林缘石碑",
+      "body": [
+        "你循着姐姐留下的红布条来到禁林边缘，一块被藤蔓缠绕的旧石碑挡在雾门前。",
+        "碑上的刻字像在低声索取代价：只有愿意付出的人，才能进入心树的路。"
+      ],
+      "prompt": "你决定如何穿过石碑前的雾门？",
+      "imageKey": "scene1",
+      "choices": [
+        {
+          "id": "scene1-offer-memory",
+          "label": "献出一段和姐姐有关的记忆，请森林放你过去"
+        },
+        {
+          "id": "scene1-force-entry",
+          "label": "点燃火把硬闯，抢在迷雾封路前冲进去"
+        }
+      ],
+      "memoryLabel": "你的记忆值：{memory}/{maxMemory}"
+    },
+    "scene2": {
+      "title": "场景2：迷雾岔路",
+      "body": [
+        "进入森林后，道路很快分成两条。雾里同时传来姐姐的呼喊，一条像在求救，另一条像在引诱你加快脚步。",
+        "风从树冠间擦过，像有人在提醒你：迷雾最擅长把焦急变成陷阱。"
+      ],
+      "prompt": "你要相信什么？",
+      "imageKey": "scene2",
+      "choices": [
+        {
+          "id": "scene2-listen-wind",
+          "label": "停下辨风，顺着真正的回声慢慢找路"
+        },
+        {
+          "id": "scene2-chase-voice",
+          "label": "追着姐姐的呼喊立刻冲过去"
+        }
+      ],
+      "memoryLabel": "你的记忆值：{memory}/{maxMemory}",
+      "clueLabel": "真相线索：{clues}"
+    },
+    "scene3": {
+      "title": "场景3：镜湖",
+      "body": [
+        "森林深处的镜湖拦住去路。漆黑湖面上，却映出姐姐已经回到家门口的身影。",
+        "如果你愿意相信这幅倒影，你现在就能转身离开，像什么都没有失去过。"
+      ],
+      "prompt": "面对镜湖的幻象，你会怎么做？",
+      "imageKey": "scene3",
+      "choices": [
+        {
+          "id": "scene3-ask-reflection",
+          "label": "向倒影发问，逼它说出姐姐为何主动进林"
+        },
+        {
+          "id": "scene3-break-mirror",
+          "label": "打碎镜面，拒绝幻象，直接渡湖"
+        }
+      ],
+      "memoryLabel": "你的记忆值：{memory}/{maxMemory}",
+      "clueLabel": "真相线索：{clues}"
+    },
+    "scene4": {
+      "title": "场景4：黑暗沼泽",
+      "body": [
+        "穿过镜湖后，前方只剩一片正在下陷的黑暗沼泽。泥水里漂着碎叶和断枝，像许多被遗忘的名字。",
+        "远处偶尔亮起一点冷白的微光，像路，也像诱饵。"
+      ],
+      "prompt": "你要怎样穿过沼泽？",
+      "imageKey": "scene4",
+      "choices": [
+        {
+          "id": "scene4-follow-lights",
+          "label": "沿着微光与凸起土堆慢慢前进"
+        },
+        {
+          "id": "scene4-shortcut",
+          "label": "抄近路硬闯，在黎明前强行穿过去"
+        }
+      ],
+      "memoryLabel": "你的记忆值：{memory}/{maxMemory}",
+      "clueLabel": "真相线索：{clues}"
+    },
+    "scene5": {
+      "title": "场景5：断桥祭坛",
+      "body": [
+        "沼泽尽头是一座断桥，桥旁祭坛半埋在晨雾里。一只白鹿被荆棘缠住，蹄边埋着通往心树的最后一条路。",
+        "黎明快到了，你只能先做一件事。"
+      ],
+      "prompt": "你把最后的时间留给谁？",
+      "imageKey": "scene5",
+      "choices": [
+        {
+          "id": "scene5-save-deer",
+          "label": "先救下白鹿，哪怕要多耗一点时间"
+        },
+        {
+          "id": "scene5-rush-bridge",
+          "label": "不管白鹿，立刻抢桥去找姐姐"
+        }
+      ],
+      "memoryLabel": "你的记忆值：{memory}/{maxMemory}",
+      "clueLabel": "真相线索：{clues}"
+    },
+    "scene6": {
+      "title": "场景6：心树空地",
+      "body": [
+        "你终于抵达心树空地。姐姐正被枯萎的树根缠在树前，晨雾在她脚边翻涌，像整片森林都在等待你的决定。",
+        "姐姐抬头看向你：‘它不是在吃人，它是在逼我们把欠下的东西还回来。’"
+      ],
+      "prompt": "最后一刻，你要怎样结束这场旧债？",
+      "imageKey": "scene6",
+      "choices": [
+        {
+          "id": "scene6-cut-roots",
+          "label": "砍断树根，带姐姐立刻离开"
+        },
+        {
+          "id": "scene6-renew-pact",
+          "label": "归还心种，承认旧约，请心树停下索债"
+        }
+      ],
+      "memoryLabel": "你的记忆值：{memory}/{maxMemory}",
+      "clueLabel": "真相线索：{clues}"
+    }
+  },
+  "transitions": {
+    "startGame": "你握紧姐姐留下的红布条，朝雾门迈出第一步。",
+    "scene1OfferMemory": "石碑吞下你脑海里一段温热的回忆，雾门缓缓分开。你记不得姐姐那天笑着说了什么，只记得你必须继续往前。",
+    "scene1ForceEntry": "火把把藤蔓烧出一道口子，你顶着扑面的浓雾闯进林中。树影在身后轻轻合拢，像是不欢迎你的到来。",
+    "scene2ListenWind": "你停下脚步，先让自己的呼吸跟上风声。真正的回音从左侧的旧猎道传来，你知道姐姐没有被拖走，她是在引你继续向前。",
+    "scene2ChaseVoice": "你追着呼喊冲进岔路，雾中的树枝在手臂上划出细痕。等你回过神，声音已经换了方向，你只能凭直觉继续赶路。",
+    "scene3AskReflection": "你在湖边问出真相，倒影沉默许久，终于把村庄背弃旧约的事说了出来。水面也把姐姐的选择还给了你：她不是被抓走，她是来替村庄还债。",
+    "scene3BreakMirror": "你用石块击碎镜面，虚假的归途瞬间散开。冷水漫过脚踝，你不再回头，只想更快见到姐姐。",
+    "scene4FollowLights": "你沿着微光踩过一块块凸起的土堆，脚下的淤泥几次想把你拖住，却终究没能让你忘记来路。",
+    "scene4Shortcut": "你直接踏进沼泽中心，淤泥立刻没过小腿。你拼命挣扎着向前，每一次抬脚都像把一小段记忆留在了泥里。",
+    "scene5SaveDeer": "你割开荆棘，把白鹿从祭坛边救了出来。它轻轻蹭过你的手心，留下一枚温热的心种，随后转身替你踏亮了通向心树的路。",
+    "scene5RushBridge": "你没有停步，借着断桥残存的木梁直接跃向对岸。白鹿在身后发出一声低鸣，像在替某种错过轻轻叹息。",
+    "scene6CutRoots": "你举起手中的刀，朝缠住姐姐的树根砍去。枝叶在头顶哀鸣，整片森林像被迫松开一口长久压抑的呼吸。",
+    "scene6RenewPactHidden": "你把心种按回心树裂开的伤口，低声承认村庄的背约，也承认姐姐和你都不该把代价推给森林。风从四周缓缓收拢，像终于有人听懂了它的语言。",
+    "scene6RenewPactFallback": "你试图完成旧约，可心树迟迟没有回应。你忽然明白，光知道真相还不够，森林从未真正把这条路交给你。",
+    "scene6RenewPactFail": "你伸手触碰心树，雾却先一步淹没了你的意识。那些本该拼好的线索在脑海里一寸寸散开，你连自己为什么来到这里都快要记不清了。"
+  },
+  "endings": {
+    "fail": {
+      "title": "失败结局：迷雾讨回了你的名字",
+      "body": [
+        "你没能把姐姐带离心树，晨雾反而带走了更多东西。你还站在森林里，却已经记不起姐姐最后望向你的眼神。",
+        "村庄暂时还在，旧债却没有结束。迷雾会在下一次夜色降临时重新回来。"
+      ],
+      "imageKey": "fail"
+    },
+    "victory": {
+      "title": "普通胜利：你救回了姐姐",
+      "body": [
+        "你带着姐姐冲出了秘境，天色终于亮了。村民围上来时，所有人都把这当成一次获救，却没人敢回头看那片突然安静下去的森林。",
+        "你赢下了救人的结果，却没能让旧债真正停下。"
+      ],
+      "imageKey": "victory"
+    },
+    "hidden": {
+      "title": "隐藏胜利：森林记住了你们",
+      "body": [
+        "心种在裂痕里发出微光，枯萎的心树终于缓缓复苏。姐姐和你一起走出秘境时，晨雾第一次不是吞噬，而是温柔地退开。",
+        "从今以后，村庄必须重新学会敬畏森林，而不是把代价继续推给一个人。"
+      ],
+      "imageKey": "hidden"
+    }
+  },
+  "ui": {
+    "brand": "森林秘境",
+    "memoryLabel": "记忆值",
+    "stageLabel": "当前阶段",
+    "clueLabel": "真相线索",
+    "resultLabel": "结局",
+    "restartLabel": "重新开始",
+    "exitLabel": "退出游戏",
+    "audioLabel": "音频",
+    "muteLabel": "静音",
+    "unmuteLabel": "开声",
+    "endingReasonLabel": "结局原因",
+    "endingStatusLabel": "关键条件",
+    "endingMemoryLabel": "最终记忆值",
+    "trustStatusLabel": "森林信任",
+    "truthStatusLabel": "真相线索",
+    "whiteDeerStatusLabel": "白鹿",
+    "heartSeedStatusLabel": "心种",
+    "metLabel": "已满足",
+    "missedLabel": "未满足",
+    "exitKicker": "旅程已经结束",
+    "exitTitle": "雾门在身后缓缓合拢",
+    "exitBody": "你离开了秘境入口，晨风穿过树林，像在等待下一次有人愿意听懂森林。"
+  }
+}
