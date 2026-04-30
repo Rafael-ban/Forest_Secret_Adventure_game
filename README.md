@@ -69,7 +69,7 @@
 - 依赖安装在当前项目的 `node_modules/`
 - npm 缓存写入当前项目的 `.npm-cache/`
 
-相关配置见 [`.npmrc`](/D:/Project_Folder/Forest_Secret_Adventure_game/.npmrc)。
+相关配置见 [`.npmrc`]Forest_Secret_Adventure_game/.npmrc)。
 
 ## 5. 安装与启动
 
@@ -145,34 +145,34 @@ Forest_Secret_Adventure_game/
 
 ## 7. 关键文件说明
 
-- [`src/data/story-content.json`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/data/story-content.json)  
+- [`src/data/story-content.json`](Forest_Secret_Adventure_game/src/data/story-content.json)  
   全部剧情文案、章节结构、选项文案、过场文案、结局文案和 UI 文案都在这里。当前已经按 `chapters.chapter1` 分层，后续加第二章时直接扩这一层。
 
-- [`src/data/story.ts`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/data/story.ts)  
+- [`src/data/story.ts`](Forest_Secret_Adventure_game/src/data/story.ts)  
   把 JSON 文案和图片资源组合成前端可直接消费的内容对象。
 
-- [`src/composables/useGameEngine.ts`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/composables/useGameEngine.ts)  
+- [`src/composables/useGameEngine.ts`](Forest_Secret_Adventure_game/src/composables/useGameEngine.ts)  
   游戏核心状态机。包括记忆值变化、场景跳转、线索累计、隐藏结局判定、重开与退出重置。
 
-- [`src/composables/useBgmController.ts`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/composables/useBgmController.ts)  
+- [`src/composables/useBgmController.ts`](Forest_Secret_Adventure_game/src/composables/useBgmController.ts)  
   控制 `开始 / 胜利 / 失败` 三段 BGM 的播放、淡入淡出和静音持久化。
 
-- [`src/components/GameShell.vue`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/components/GameShell.vue)  
+- [`src/components/GameShell.vue`](Forest_Secret_Adventure_game/src/components/GameShell.vue)  
   主界面容器，负责在开场页、场景页和结局弹层之间切换。
 
-- [`src/composables/useGameEngine.test.ts`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/composables/useGameEngine.test.ts)  
+- [`src/composables/useGameEngine.test.ts`](Forest_Secret_Adventure_game/src/composables/useGameEngine.test.ts)  
   剧情流程测试。
 
-- [`src/composables/useBgmController.test.ts`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/composables/useBgmController.test.ts)  
+- [`src/composables/useBgmController.test.ts`](Forest_Secret_Adventure_game/src/composables/useBgmController.test.ts)  
   BGM 控制测试。
 
 ## 8. 音频资源如何替换
 
 当前项目默认读取这三个文件：
 
-- [`src/assets/audio/bgm-start.mp3`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/assets/audio/bgm-start.mp3)
-- [`src/assets/audio/bgm-victory.mp3`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/assets/audio/bgm-victory.mp3)
-- [`src/assets/audio/bgm-fail.mp3`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/assets/audio/bgm-fail.mp3)
+- [`src/assets/audio/bgm-start.mp3`](Forest_Secret_Adventure_game/src/assets/audio/bgm-start.mp3)
+- [`src/assets/audio/bgm-victory.mp3`](Forest_Secret_Adventure_game/src/assets/audio/bgm-victory.mp3)
+- [`src/assets/audio/bgm-fail.mp3`](Forest_Secret_Adventure_game/src/assets/audio/bgm-fail.mp3)
 
 替换方式很直接：
 
@@ -189,22 +189,22 @@ Forest_Secret_Adventure_game/
 
 ## 9. 图片资源如何替换
 
-当前项目的插画都在 [`src/assets/images`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/assets/images) 下，包含：
+当前项目的插画都在 [`src/assets/images`](Forest_Secret_Adventure_game/src/assets/images) 下，包含：
 
 - `1` 张开场图
 - `12` 张场景图
 - `3` 张结局图
 
-实际文件映射以 [`src/data/story.ts`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/data/story.ts) 为准。
+实际文件映射以 [`src/data/story.ts`](Forest_Secret_Adventure_game/src/data/story.ts) 为准。
 
 如果你要换图：
 
 1. 保持文件名不变，直接替换文件
-2. 或者改 [`src/data/story.ts`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/data/story.ts) 中的 import 与映射
+2. 或者改 [`src/data/story.ts`](Forest_Secret_Adventure_game/src/data/story.ts) 中的 import 与映射
 
 ## 10. 如何修改剧情文案
 
-直接编辑 [`src/data/story-content.json`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/data/story-content.json)。
+直接编辑 [`src/data/story-content.json`](Forest_Secret_Adventure_game/src/data/story-content.json)。
 
 最常改的几个区域：
 
@@ -237,7 +237,7 @@ Forest_Secret_Adventure_game/
 
 - 只改 `label` 很安全
 - `id` 不要随便改
-- 如果改了 `id`，必须同步修改 [`src/composables/useGameEngine.ts`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/composables/useGameEngine.ts) 里的分支逻辑
+- 如果改了 `id`，必须同步修改 [`src/composables/useGameEngine.ts`](Forest_Secret_Adventure_game/src/composables/useGameEngine.ts) 里的分支逻辑
 
 ### 10.2 文案占位符
 
@@ -262,7 +262,7 @@ Forest_Secret_Adventure_game/
 
 如果是改玩法、数值或结局条件，主要改这个文件：
 
-- [`src/composables/useGameEngine.ts`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/composables/useGameEngine.ts)
+- [`src/composables/useGameEngine.ts`](Forest_Secret_Adventure_game/src/composables/useGameEngine.ts)
 
 常见修改点：
 
@@ -315,7 +315,7 @@ npm.cmd run build
 
 ### Q3：我只想改文字，不想碰 TypeScript，改哪里？
 
-直接改 [`src/data/story-content.json`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/data/story-content.json)。
+直接改 [`src/data/story-content.json`](Forest_Secret_Adventure_game/src/data/story-content.json)。
 
 ### Q4：我换了图片和音频之后，还要做什么？
 
@@ -331,9 +331,9 @@ npm.cmd run build
 如果你第一次接这个项目，建议按这个顺序看：
 
 1. 先跑起来，手动玩一遍
-2. 看 [`src/data/story-content.json`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/data/story-content.json)
-3. 看 [`src/composables/useGameEngine.ts`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/composables/useGameEngine.ts)
-4. 看 [`src/composables/useBgmController.ts`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/composables/useBgmController.ts)
+2. 看 [`src/data/story-content.json`](Forest_Secret_Adventure_game/src/data/story-content.json)
+3. 看 [`src/composables/useGameEngine.ts`](Forest_Secret_Adventure_game/src/composables/useGameEngine.ts)
+4. 看 [`src/composables/useBgmController.ts`](Forest_Secret_Adventure_game/src/composables/useBgmController.ts)
 5. 运行测试
 6. 再开始改剧情或规则
 
