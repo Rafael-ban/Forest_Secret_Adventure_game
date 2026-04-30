@@ -32,49 +32,87 @@ class FakeStorage implements StorageLike {
   }
 }
 
+function createController(storage = new FakeStorage(), audios: FakeAudio[] = []) {
+  return createBgmController({
+    audioFactory: () => {
+      const audio = new FakeAudio()
+      audios.push(audio)
+      return audio
+    },
+    storage,
+    fadeInMs: {
+      home: 0,
+      prologue: 0,
+      departure: 0,
+      investigation: 0,
+      revelation: 0,
+      danger: 0,
+      finale: 0,
+      victory: 0,
+      hidden: 0,
+      fail: 0
+    },
+    fadeOutMs: {
+      home: 0,
+      prologue: 0,
+      departure: 0,
+      investigation: 0,
+      revelation: 0,
+      danger: 0,
+      finale: 0,
+      victory: 0,
+      hidden: 0,
+      fail: 0
+    }
+  })
+}
+
 describe('createBgmController', () => {
-  it('starts the adventure bgm in loop mode', () => {
-    const audios: FakeAudio[] = []
-    const controller = createBgmController({
-      audioFactory: () => {
-        const audio = new FakeAudio()
-        audios.push(audio)
-        return audio
-      },
-      storage: new FakeStorage(),
-      fadeInMs: { start: 0, victory: 0, fail: 0 },
-      fadeOutMs: { start: 0, victory: 0, fail: 0 }
-    })
+  it('starts idle before any user-triggered playback', () => {
+    const controller = createController()
 
-    controller.startAdventure()
-
-    expect(controller.bgmState.value).toBe('start')
-    expect(audios[0]?.loop).toBe(true)
-    expect(audios[0]?.playCalls).toBe(1)
+    expect(controller.bgmState.value).toBe('idle')
   })
 
-  it('switches to victory music for positive endings', () => {
-    const controller = createBgmController({
-      audioFactory: () => new FakeAudio(),
-      storage: new FakeStorage(),
-      fadeInMs: { start: 0, victory: 0, fail: 0 },
-      fadeOutMs: { start: 0, victory: 0, fail: 0 }
-    })
+  it('plays looping exploration cues without restarting the same cue', () => {
+    const audios: FakeAudio[] = []
+    const controller = createController(new FakeStorage(), audios)
 
-    controller.startAdventure()
-    controller.playEnding('victory')
+    controller.playCue('home')
+    controller.playCue('prologue')
+    controller.playCue('danger')
+    controller.playCue('danger')
 
-    expect(controller.bgmState.value).toBe('victory')
+    expect(controller.bgmState.value).toBe('danger')
+    expect(audios[0]?.loop).toBe(true)
+    expect(audios[1]?.loop).toBe(true)
+    expect(audios[2]?.loop).toBe(true)
+    expect(audios[2]?.playCalls).toBe(1)
+  })
+
+  it('plays hidden ending music without loop mode', () => {
+    const audios: FakeAudio[] = []
+    const controller = createController(new FakeStorage(), audios)
+
+    controller.playCue('hidden')
+
+    expect(controller.bgmState.value).toBe('hidden')
+    expect(audios[0]?.loop).toBe(false)
+  })
+
+  it('plays fail music without loop mode', () => {
+    const audios: FakeAudio[] = []
+    const controller = createController(new FakeStorage(), audios)
+
+    controller.playCue('fail')
+
+    expect(controller.bgmState.value).toBe('fail')
+    expect(audios[0]?.loop).toBe(false)
   })
 
   it('persists the mute toggle', () => {
     const storage = new FakeStorage()
-    const controller = createBgmController({
-      audioFactory: () => new FakeAudio(),
-      storage,
-      fadeInMs: { start: 0, victory: 0, fail: 0 },
-      fadeOutMs: { start: 0, victory: 0, fail: 0 }
-    })
+    const controller = createController(storage)
 
     controller.toggleMuted()
 
@@ -86,27 +124,17 @@ describe('createBgmController', () => {
     const storage = new FakeStorage()
     storage.setItem('forest-secret-adventure-muted', 'true')
 
-    const controller = createBgmController({
-      audioFactory: () => new FakeAudio(),
-      storage,
-      fadeInMs: { start: 0, victory: 0, fail: 0 },
-      fadeOutMs: { start: 0, victory: 0, fail: 0 }
-    })
+    const controller = createController(storage)
 
     expect(controller.audioMuted.value).toBe(true)
   })
 
-  it('switches to fail music for failed endings', () => {
-    const controller = createBgmController({
-      audioFactory: () => new FakeAudio(),
-      storage: new FakeStorage(),
-      fadeInMs: { start: 0, victory: 0, fail: 0 },
-      fadeOutMs: { start: 0, victory: 0, fail: 0 }
-    })
+  it('resets to idle when requested', () => {
+    const controller = createController()
 
-    controller.startAdventure()
-    controller.playEnding('fail')
+    controller.playCue('victory')
+    controller.resetToIdle()
 
-    expect(controller.bgmState.value).toBe('fail')
+    expect(controller.bgmState.value).toBe('idle')
   })
 })

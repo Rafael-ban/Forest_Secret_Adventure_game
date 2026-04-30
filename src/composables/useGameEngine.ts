@@ -1,25 +1,40 @@
 import { computed, reactive, watch } from 'vue'
-import { endings, getSceneImage, introContent, storyData } from '../data/story'
+import {
+  DEFAULT_CHAPTER_ID,
+  getChapter,
+  getEndingContent,
+  getHomeContent,
+  getPrologueContent,
+  getSceneImage,
+  storyData
+} from '../data/story'
 import { useBgmController } from './useBgmController'
 import type {
   BgmControllerLike,
+  ChapterId,
+  ChoiceRuleId,
   EndingContent,
   EndingId,
   EndingReasonId,
   EndingStatusItem,
   GameState,
+  PageContent,
   SceneContent,
-  SceneId
+  SceneId,
+  ViewId
 } from '../types/game'
 
 const MAX_MEMORY = 10
 
-function createInitialState(audioMuted = false): GameState {
+function createInitialState(audioMuted = false, view: ViewId = 'home'): GameState {
+  const chapter = getChapter(DEFAULT_CHAPTER_ID)
+
   return {
-    hasStarted: false,
+    view,
     memory: MAX_MEMORY,
     maxMemory: MAX_MEMORY,
-    currentSceneId: 'scene1',
+    currentChapterId: DEFAULT_CHAPTER_ID,
+    currentSceneId: chapter.startSceneId,
     trustForest: false,
     truthClueCount: 0,
     savedWhiteDeer: false,
@@ -58,33 +73,94 @@ export function useGameEngine(options: UseGameEngineOptions = {}) {
     { immediate: true, flush: 'sync' }
   )
 
-  function resetState() {
-    Object.assign(state, createInitialState(bgmController.audioMuted.value))
+  const currentChapter = computed(() => getChapter(state.currentChapterId))
+  const homeContent = computed(() => getHomeContent(state.currentChapterId))
+  const prologueContent = computed(() => getPrologueContent(state.currentChapterId))
+
+  function resetForView(view: ViewId) {
+    Object.assign(state, createInitialState(bgmController.audioMuted.value, view))
     historyId = 0
-    bgmController.resetToIdle()
   }
 
   function pushHistory(text: string) {
+    const sceneId =
+      state.view === 'home'
+        ? 'home'
+        : state.view === 'prologue'
+          ? 'prologue'
+          : state.currentSceneId
+
     state.history.push({
       id: ++historyId,
-      sceneId: state.hasStarted ? state.currentSceneId : 'intro',
+      chapterId: state.currentChapterId,
+      sceneId,
       text
     })
   }
 
-  function setTransition(text: string) {
+  function setTransition(text: string | null) {
     state.transitionText = text
-    pushHistory(text)
+
+    if (text) {
+      pushHistory(text)
+    }
   }
 
   function clampMemory(value: number) {
     return Math.max(0, Math.min(MAX_MEMORY, value))
   }
 
+  function hasHiddenEndingRoute() {
+    return (
+      state.trustForest &&
+      state.truthClueCount >= 8 &&
+      state.savedWhiteDeer &&
+      state.hasHeartSeed &&
+      state.memory > 0
+    )
+  }
+
+  function hasPactVictoryRoute() {
+    return state.truthClueCount >= 6 && state.memory > 1
+  }
+
+  function resolveChoiceRule(rule: ChoiceRuleId) {
+    switch (rule) {
+      case 'swamp_follow_lights':
+        return {
+          memoryDelta: state.trustForest || state.truthClueCount >= 4 ? -1 : -2
+        }
+      case 'final_pact_resolution':
+        if (hasHiddenEndingRoute()) {
+          return {
+            endingId: 'hidden' as EndingId,
+            endingReason: 'forest_blessing' as EndingReasonId
+          }
+        }
+
+        if (hasPactVictoryRoute()) {
+          return {
+            endingId: 'victory' as EndingId,
+            endingReason: 'pact_incomplete' as EndingReasonId
+          }
+        }
+
+        return {
+          endingId: 'fail' as EndingId,
+          endingReason: 'pact_rejected' as EndingReasonId
+        }
+    }
+  }
+
+  function syncSceneCue(sceneId: SceneId = state.currentSceneId) {
+    bgmController.playCue(currentChapter.value.scenes[sceneId].musicCue)
+  }
+
   function triggerEnding(endingId: EndingId, endingReason: EndingReasonId) {
     state.ending = endingId
     state.endingReason = endingReason
-    bgmController.playEnding(endingId === 'fail' ? 'fail' : 'victory')
+    const ending = currentChapter.value.endings[endingId]
+    bgmController.playCue(ending.musicCue)
   }
 
   function applyMemoryDelta(delta: number) {
@@ -100,121 +176,93 @@ export function useGameEngine(options: UseGameEngineOptions = {}) {
 
   function goToScene(sceneId: SceneId) {
     state.currentSceneId = sceneId
+    syncSceneCue(sceneId)
   }
 
-  function hasHiddenEndingRoute() {
-    return (
-      state.trustForest &&
-      state.truthClueCount >= 2 &&
-      state.savedWhiteDeer &&
-      state.hasHeartSeed &&
-      state.memory > 0
-    )
-  }
-
-  function startGame() {
-    if (state.hasStarted) {
+  function enterPrologue() {
+    if (state.view !== 'home') {
       return
     }
 
-    state.hasStarted = true
-    state.currentSceneId = 'scene1'
-    setTransition(storyData.transitions.startGame)
-    bgmController.startAdventure()
+    state.view = 'prologue'
+    state.currentSceneId = currentChapter.value.startSceneId
+    setTransition(currentChapter.value.transitions.enterPrologue)
+    bgmController.playCue(homeContent.value.musicCue)
+  }
+
+  function startAdventure() {
+    if (state.view !== 'prologue') {
+      return
+    }
+
+    state.view = 'playing'
+    state.currentSceneId = currentChapter.value.startSceneId
+    setTransition(currentChapter.value.transitions.startAdventure)
+    syncSceneCue(currentChapter.value.startSceneId)
+  }
+
+  function chooseConfiguredOption(choiceId: string) {
+    const scene = currentChapter.value.scenes[state.currentSceneId]
+    const choice = scene.choices.find((item) => item.id === choiceId)
+
+    if (!choice) {
+      return
+    }
+
+    const resolvedRule = choice.effect.rule ? resolveChoiceRule(choice.effect.rule) : null
+    const memoryDelta = resolvedRule?.memoryDelta ?? choice.effect.memoryDelta ?? 0
+
+    if (memoryDelta !== 0 && !applyMemoryDelta(memoryDelta)) {
+      return
+    }
+
+    state.truthClueCount += choice.effect.truthClueDelta ?? 0
+
+    if (choice.effect.setTrustForest) {
+      state.trustForest = true
+    }
+
+    if (choice.effect.setSavedWhiteDeer) {
+      state.savedWhiteDeer = true
+    }
+
+    if (choice.effect.setHasHeartSeed) {
+      state.hasHeartSeed = true
+    }
+
+    const transitionText = currentChapter.value.transitions[choice.effect.transitionKey] ?? null
+    setTransition(transitionText)
+
+    const endingId = resolvedRule?.endingId ?? choice.effect.endingId
+    const endingReason = resolvedRule?.endingReason ?? choice.effect.endingReason
+
+    if (endingId && endingReason) {
+      triggerEnding(endingId, endingReason)
+      return
+    }
+
+    if (choice.effect.nextSceneId) {
+      goToScene(choice.effect.nextSceneId)
+    }
   }
 
   function chooseOption(choiceId: string) {
-    if (!state.hasStarted || state.ending) {
+    if (state.view !== 'playing' || state.ending) {
       return
     }
 
-    switch (choiceId) {
-      case 'scene1-offer-memory':
-        if (!applyMemoryDelta(-1)) return
-        state.trustForest = true
-        setTransition(storyData.transitions.scene1OfferMemory)
-        goToScene('scene2')
-        return
-      case 'scene1-force-entry':
-        setTransition(storyData.transitions.scene1ForceEntry)
-        goToScene('scene2')
-        return
-      case 'scene2-listen-wind':
-        state.truthClueCount += 1
-        setTransition(storyData.transitions.scene2ListenWind)
-        goToScene('scene3')
-        return
-      case 'scene2-chase-voice':
-        if (!applyMemoryDelta(-2)) return
-        setTransition(storyData.transitions.scene2ChaseVoice)
-        goToScene('scene3')
-        return
-      case 'scene3-ask-reflection':
-        if (!applyMemoryDelta(-1)) return
-        state.truthClueCount += 1
-        setTransition(storyData.transitions.scene3AskReflection)
-        goToScene('scene4')
-        return
-      case 'scene3-break-mirror':
-        if (!applyMemoryDelta(-1)) return
-        setTransition(storyData.transitions.scene3BreakMirror)
-        goToScene('scene4')
-        return
-      case 'scene4-follow-lights': {
-        const loss = state.truthClueCount > 0 || state.trustForest ? -1 : -2
-        if (!applyMemoryDelta(loss)) return
-        setTransition(storyData.transitions.scene4FollowLights)
-        goToScene('scene5')
-        return
-      }
-      case 'scene4-shortcut':
-        if (!applyMemoryDelta(-4)) return
-        setTransition(storyData.transitions.scene4Shortcut)
-        goToScene('scene5')
-        return
-      case 'scene5-save-deer':
-        if (!applyMemoryDelta(-1)) return
-        state.savedWhiteDeer = true
-        state.hasHeartSeed = true
-        setTransition(storyData.transitions.scene5SaveDeer)
-        goToScene('scene6')
-        return
-      case 'scene5-rush-bridge':
-        if (!applyMemoryDelta(-2)) return
-        setTransition(storyData.transitions.scene5RushBridge)
-        goToScene('scene6')
-        return
-      case 'scene6-cut-roots':
-        setTransition(storyData.transitions.scene6CutRoots)
-        triggerEnding('victory', 'forced_rescue')
-        return
-      case 'scene6-renew-pact':
-        if (hasHiddenEndingRoute()) {
-          setTransition(storyData.transitions.scene6RenewPactHidden)
-          triggerEnding('hidden', 'forest_blessing')
-          return
-        }
-
-        if (state.truthClueCount >= 2 && state.memory > 1) {
-          setTransition(storyData.transitions.scene6RenewPactFallback)
-          triggerEnding('victory', 'pact_incomplete')
-          return
-        }
-
-        setTransition(storyData.transitions.scene6RenewPactFail)
-        triggerEnding('fail', 'pact_rejected')
-        return
-      default:
-        return
-    }
+    chooseConfiguredOption(choiceId)
   }
 
   function restart() {
-    resetState()
+    resetForView('prologue')
+    setTransition(currentChapter.value.transitions.enterPrologue)
+    bgmController.playCue(homeContent.value.musicCue)
   }
 
   function exitGame() {
-    resetState()
+    resetForView('home')
+    bgmController.playCue(homeContent.value.musicCue)
   }
 
   function toggleAudio() {
@@ -222,44 +270,49 @@ export function useGameEngine(options: UseGameEngineOptions = {}) {
   }
 
   const currentScene = computed<SceneContent>(() => {
-    const scene = storyData.scenes[state.currentSceneId]
+    const scene = currentChapter.value.scenes[state.currentSceneId]
 
     return {
       id: state.currentSceneId,
       title: scene.title,
       body: [...scene.body],
       prompt: scene.prompt,
-      image: getSceneImage(state.currentSceneId),
+      image: getSceneImage(state.currentChapterId, state.currentSceneId),
+      musicCue: scene.musicCue,
       choices: scene.choices
     }
   })
+
+  const currentPage = computed<PageContent>(() =>
+    state.view === 'home' ? homeContent.value : prologueContent.value
+  )
 
   function buildEndingReasonSummary(endingReason: EndingReasonId) {
     switch (endingReason) {
       case 'memory_depleted':
         return [
-          '你在抵达终点前耗尽了记忆值，迷雾先一步带走了你用来辨认真相的力量。',
-          '这场失败不是因为你没有继续前进，而是你已经无法保住自己为何而来。'
+          '你在抵达终点前先丢失了最关键的记忆，森林不再承认你的来意。',
+          '你知道自己是在追姐姐，却已经说不清为什么一定要把她带回来。'
         ]
       case 'forced_rescue':
         return [
-          '你选择直接砍断树根，把姐姐从心树前强行带离，所以保住了人，却没有真正修复旧约。',
-          '这是一场救人的胜利，也是把代价继续留给森林的胜利。'
+          '你选择先把姐姐带离心树，把今夜的危险切断在眼前。',
+          '可旧约没有被修复，森林只是把这笔债推迟到了下一次。'
         ]
       case 'pact_incomplete':
         return [
-          '你试图修复旧约，也拼回了一部分真相，但森林没有把全部条件交到你手里。',
-          '你因此救回了姐姐，却没能让心树真正接受新的约定。'
+          '你理解了大部分真相，也愿意请求心树停手，但还不足以让旧约完整闭合。',
+          '姐姐得救了，森林也短暂安静了下来，只是伤口没有真正长好。'
         ]
       case 'pact_rejected':
         return [
-          '你走到了心树面前，却没有同时带着足够的信任、线索与代价去完成旧约。',
-          '迷雾没有接受你的请求，反而把你一路拼起的理解重新打散了。'
+          '你尝试修复旧约，却没有带着足够完整的真相和准备来到心树前。',
+          '心树没有接受这次归还，迷雾也因此没有停止。'
         ]
       case 'forest_blessing':
         return [
-          '你赢得了森林的初步信任，拼回了真相，也救下白鹿拿到了心种。',
-          '当你归还心种并承认旧约，心树终于接受了这次修复，而不是继续索债。'
+          '你带着足够的真相、信任和心种来到终点，终于说出了森林愿意听见的话。',
+          '姐姐活了下来，心树也重新认回了村庄欠下并愿意偿还的名字。'
         ]
     }
   }
@@ -267,6 +320,12 @@ export function useGameEngine(options: UseGameEngineOptions = {}) {
   function buildEndingStatusItems(): EndingStatusItem[] {
     const memoryTone =
       state.memory <= 0 ? 'danger' : state.memory <= 2 ? 'warning' : 'success'
+    const truthTone =
+      state.truthClueCount >= 8
+        ? 'success'
+        : state.truthClueCount >= 6
+          ? 'warning'
+          : 'danger'
 
     return [
       {
@@ -282,7 +341,7 @@ export function useGameEngine(options: UseGameEngineOptions = {}) {
       {
         label: storyData.ui.truthStatusLabel,
         value: `${state.truthClueCount} 条`,
-        tone: state.truthClueCount >= 2 ? 'success' : 'warning'
+        tone: truthTone
       },
       {
         label: storyData.ui.whiteDeerStatusLabel,
@@ -302,7 +361,7 @@ export function useGameEngine(options: UseGameEngineOptions = {}) {
       return null
     }
 
-    const ending = endings[state.ending]
+    const ending = getEndingContent(state.currentChapterId, state.ending)
 
     return {
       ...ending,
@@ -312,19 +371,35 @@ export function useGameEngine(options: UseGameEngineOptions = {}) {
     }
   })
 
-  const locationName = computed(() =>
-    state.hasStarted ? currentScene.value.title.replace(/^场景\d+：/, '') : introContent.title
-  )
+  const locationName = computed(() => {
+    if (state.view === 'home' || state.view === 'prologue') {
+      return currentPage.value.title
+    }
+
+    return currentScene.value.title
+  })
+
+  const sceneIndex = computed(() => {
+    const index = currentChapter.value.sceneOrder.indexOf(state.currentSceneId)
+    return index >= 0 ? index + 1 : 1
+  })
+
+  const sceneCount = computed(() => currentChapter.value.sceneOrder.length)
 
   return {
     state,
-    introContent,
+    homeContent,
+    prologueContent,
+    currentPage,
     currentScene,
     currentEnding,
     activeChoices: computed(() => currentScene.value.choices),
     locationName,
+    sceneIndex,
+    sceneCount,
     uiText: storyData.ui,
-    startGame,
+    enterPrologue,
+    startAdventure,
     chooseOption,
     restart,
     exitGame,

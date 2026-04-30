@@ -1,5 +1,5 @@
 <template>
-  <section class="status-panel" aria-label="状态栏">
+  <section class="status-panel" aria-label="游戏状态">
     <div class="hud-item">
       <span class="hud-label">{{ memoryLabel }}</span>
       <strong class="hud-value">{{ memory }}/{{ maxMemory }}</strong>

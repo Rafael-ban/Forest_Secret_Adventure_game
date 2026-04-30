@@ -1,7 +1,7 @@
 <template>
   <div class="ending-modal">
     <div class="ending-backdrop" />
-    <section class="ending-panel" aria-label="结局">
+    <section class="ending-panel" aria-label="结局面板">
       <img
         class="ending-image"
         :src="ending.image"

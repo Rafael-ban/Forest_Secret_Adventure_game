@@ -5,10 +5,10 @@
 
 ## 1. 当前版本包含什么
 
-- 开场页 + `6` 个连续场景
+- 开场页 + `12` 个连续场景
 - `记忆值` 数值系统，初始值为 `10`
 - `开始 BGM / 胜利 BGM / 失败 BGM`
-- `10` 张全屏插画资源
+- `16` 张全屏插画资源
 - `3` 个结局：失败、普通胜利、隐藏胜利
 - JSON 化剧情配置
 - 自动化流程测试
@@ -51,7 +51,7 @@
 必须同时满足：
 
 1. 在石碑前献出记忆，获得森林初步信任
-2. 在迷雾岔路和镜湖累计至少 `2` 条真相线索
+2. 全程累计至少 `5` 条真相线索
 3. 在断桥祭坛救下白鹿
 4. 拿到心种
 5. 最终选择“归还心种，承认旧约，请心树停下索债”
@@ -146,7 +146,7 @@ Forest_Secret_Adventure_game/
 ## 7. 关键文件说明
 
 - [`src/data/story-content.json`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/data/story-content.json)  
-  全部剧情文案、选项文案、过场文案、结局文案和 UI 文案都在这里。只改文案时，优先改这个文件。
+  全部剧情文案、章节结构、选项文案、过场文案、结局文案和 UI 文案都在这里。当前已经按 `chapters.chapter1` 分层，后续加第二章时直接扩这一层。
 
 - [`src/data/story.ts`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/data/story.ts)  
   把 JSON 文案和图片资源组合成前端可直接消费的内容对象。
@@ -189,18 +189,13 @@ Forest_Secret_Adventure_game/
 
 ## 9. 图片资源如何替换
 
-当前项目使用这些全屏背景图：
+当前项目的插画都在 [`src/assets/images`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/assets/images) 下，包含：
 
-- [`src/assets/images/intro-village-gate.png`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/assets/images/intro-village-gate.png)
-- [`src/assets/images/scene1-stone-stele.png`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/assets/images/scene1-stone-stele.png)
-- [`src/assets/images/scene2-fog-crossroads.png`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/assets/images/scene2-fog-crossroads.png)
-- [`src/assets/images/scene3-mirror-lake.png`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/assets/images/scene3-mirror-lake.png)
-- [`src/assets/images/scene4-dark-swamp.png`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/assets/images/scene4-dark-swamp.png)
-- [`src/assets/images/scene5-broken-bridge-altar.png`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/assets/images/scene5-broken-bridge-altar.png)
-- [`src/assets/images/scene6-heart-tree-clearing.png`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/assets/images/scene6-heart-tree-clearing.png)
-- [`src/assets/images/ending-fail-lost-memory.png`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/assets/images/ending-fail-lost-memory.png)
-- [`src/assets/images/ending-victory-rescue.png`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/assets/images/ending-victory-rescue.png)
-- [`src/assets/images/ending-hidden-blessing.png`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/assets/images/ending-hidden-blessing.png)
+- `1` 张开场图
+- `12` 张场景图
+- `3` 张结局图
+
+实际文件映射以 [`src/data/story.ts`](/D:/Project_Folder/Forest_Secret_Adventure_game/src/data/story.ts) 为准。
 
 如果你要换图：
 
@@ -213,11 +208,30 @@ Forest_Secret_Adventure_game/
 
 最常改的几个区域：
 
-- `intro`：开场页标题、导语、按钮
-- `scenes.scene1` 到 `scenes.scene6`：场景正文与选项
-- `transitions`：每次选择后的过场反馈
-- `endings`：三个结局文案
+- `chapters.chapter1.intro`：开场页标题、导语、按钮
+- `chapters.chapter1.sceneOrder`：当前章节的场景顺序
+- `chapters.chapter1.scenes.scene1` 到 `chapters.chapter1.scenes.scene12`：场景正文与选项
+- `chapters.chapter1.transitions`：每次选择后的过场反馈
+- `chapters.chapter1.endings`：三个结局文案
 - `ui`：按钮、状态栏、弹层文案
+
+当前每个选项除了文案，还带有 `effect` 配置。这里定义：
+
+- 跳转到哪个场景
+- 扣减或恢复多少记忆值
+- 是否增加真相线索
+- 是否获得森林信任 / 白鹿 / 心种
+- 是否直接进入某个结局
+- 是否走动态规则，例如沼泽试路和最终修约判定
+
+如果后续要扩第二章，直接新增：
+
+```json
+"chapters": {
+  "chapter1": { "...": "..." },
+  "chapter2": { "...": "..." }
+}
+```
 
 ### 10.1 修改选项时要注意
 
@@ -253,8 +267,10 @@ Forest_Secret_Adventure_game/
 常见修改点：
 
 - 初始记忆值：`MAX_MEMORY`
-- 某个选项扣多少记忆值
-- 哪些选择会增加 `truthClueCount`
+- 某个选项的 `choices[].effect.memoryDelta`
+- 哪些选择会增加 `choices[].effect.truthClueDelta`
+- 哪些选择会设置 `setTrustForest / setSavedWhiteDeer / setHasHeartSeed`
+- 动态规则 `swamp_follow_lights` 和 `final_pact_resolution`
 - 隐藏结局条件
 - 退出和重开的状态重置
 

@@ -2,7 +2,7 @@
   <section
     v-if="choices.length"
     class="choice-list"
-    aria-label="选项列表"
+    aria-label="剧情选项"
   >
     <button
       v-for="(choice, index) in choices"
@@ -12,7 +12,13 @@
       @click="$emit('select', choice.id)"
     >
       <span class="choice-index">{{ String(index + 1).padStart(2, '0') }}</span>
-      <span class="choice-copy">{{ choice.label }}</span>
+      <span class="choice-copy">
+        <span class="choice-topline">
+          <span class="choice-text">{{ choice.label }}</span>
+          <span v-if="choice.toneLabel" class="choice-tone">{{ choice.toneLabel }}</span>
+        </span>
+        <span v-if="choice.effectHint" class="choice-hint">{{ choice.effectHint }}</span>
+      </span>
     </button>
   </section>
 </template>

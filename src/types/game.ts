@@ -1,3 +1,7 @@
+export type ChapterId = 'chapter1'
+
+export type ViewId = 'home' | 'prologue' | 'playing'
+
 export type SceneId =
   | 'scene1'
   | 'scene2'
@@ -5,9 +9,32 @@ export type SceneId =
   | 'scene4'
   | 'scene5'
   | 'scene6'
+  | 'scene7'
+  | 'scene8'
+  | 'scene9'
+  | 'scene10'
+  | 'scene11'
+  | 'scene12'
+  | 'scene13'
+  | 'scene14'
+  | 'scene15'
 
 export type EndingId = 'victory' | 'fail' | 'hidden'
-export type BgmState = 'idle' | 'start' | 'victory' | 'fail'
+
+export type BgmCue =
+  | 'home'
+  | 'prologue'
+  | 'departure'
+  | 'investigation'
+  | 'revelation'
+  | 'danger'
+  | 'finale'
+  | 'victory'
+  | 'hidden'
+  | 'fail'
+
+export type BgmState = 'idle' | BgmCue
+
 export type EndingReasonId =
   | 'memory_depleted'
   | 'forced_rescue'
@@ -15,29 +42,58 @@ export type EndingReasonId =
   | 'pact_rejected'
   | 'forest_blessing'
 
+export type ChoiceRuleId = 'swamp_follow_lights' | 'final_pact_resolution'
+
 export type ImageKey =
-  | 'intro'
+  | 'home'
+  | 'prologue'
   | 'scene1'
   | 'scene2'
   | 'scene3'
   | 'scene4'
   | 'scene5'
   | 'scene6'
+  | 'scene7'
+  | 'scene8'
+  | 'scene9'
+  | 'scene10'
+  | 'scene11'
+  | 'scene12'
+  | 'scene13'
+  | 'scene14'
+  | 'scene15'
   | 'fail'
   | 'victory'
   | 'hidden'
 
+export interface StoryChoiceEffect {
+  transitionKey: string
+  nextSceneId?: SceneId
+  memoryDelta?: number
+  truthClueDelta?: number
+  setTrustForest?: boolean
+  setSavedWhiteDeer?: boolean
+  setHasHeartSeed?: boolean
+  endingId?: EndingId
+  endingReason?: EndingReasonId
+  rule?: ChoiceRuleId
+}
+
 export interface StoryChoice {
   id: string
   label: string
+  toneLabel?: string
+  effectHint?: string
+  effect: StoryChoiceEffect
 }
 
-export interface IntroTemplate {
+export interface StoryPageTemplate {
   kicker: string
   title: string
   body: string[]
   buttonLabel: string
   imageKey: ImageKey
+  musicCue: BgmCue
 }
 
 export interface SceneTemplate {
@@ -45,15 +101,15 @@ export interface SceneTemplate {
   body: string[]
   prompt: string
   imageKey: ImageKey
+  musicCue: BgmCue
   choices: StoryChoice[]
-  memoryLabel?: string
-  clueLabel?: string
 }
 
 export interface EndingTemplate {
   title: string
   body: string[]
   imageKey: ImageKey
+  musicCue: BgmCue
 }
 
 export interface EndingStatusItem {
@@ -62,14 +118,23 @@ export interface EndingStatusItem {
   tone?: 'neutral' | 'success' | 'warning' | 'danger'
 }
 
-export interface StoryTextData {
-  intro: IntroTemplate
+export interface StoryChapterTemplate {
+  label: string
+  startSceneId: SceneId
+  sceneOrder: SceneId[]
+  home: StoryPageTemplate
+  prologue: StoryPageTemplate
   scenes: Record<SceneId, SceneTemplate>
   transitions: Record<string, string>
   endings: Record<EndingId, EndingTemplate>
+}
+
+export interface StoryTextData {
+  chapters: Record<ChapterId, StoryChapterTemplate>
   ui: {
     brand: string
     memoryLabel: string
+    progressLabel: string
     stageLabel: string
     clueLabel: string
     resultLabel: string
@@ -87,9 +152,10 @@ export interface StoryTextData {
     heartSeedStatusLabel: string
     metLabel: string
     missedLabel: string
-    exitKicker: string
-    exitTitle: string
-    exitBody: string
+    homeTagLabel: string
+    prologueTagLabel: string
+    beginJourneyLabel: string
+    returnHomeLabel: string
   }
 }
 
@@ -99,15 +165,17 @@ export interface SceneContent {
   body: string[]
   prompt: string
   image: string
+  musicCue: BgmCue
   choices: StoryChoice[]
 }
 
-export interface IntroContent {
+export interface PageContent {
   kicker: string
   title: string
   body: string[]
   buttonLabel: string
   image: string
+  musicCue: BgmCue
 }
 
 export interface EndingContent {
@@ -115,20 +183,23 @@ export interface EndingContent {
   title: string
   body: string[]
   image: string
+  musicCue: BgmCue
   reasonSummary?: string[]
   statusItems?: EndingStatusItem[]
 }
 
 export interface HistoryEntry {
   id: number
-  sceneId: SceneId | 'intro'
+  chapterId: ChapterId
+  sceneId: SceneId | 'home' | 'prologue'
   text: string
 }
 
 export interface GameState {
-  hasStarted: boolean
+  view: ViewId
   memory: number
   maxMemory: number
+  currentChapterId: ChapterId
   currentSceneId: SceneId
   trustForest: boolean
   truthClueCount: number
@@ -159,8 +230,7 @@ export interface AudioLike {
 export interface BgmControllerLike {
   audioMuted: { value: boolean }
   bgmState: { value: BgmState }
-  startAdventure(): void
-  playEnding(kind: 'victory' | 'fail'): void
+  playCue(cue: BgmCue): void
   resetToIdle(): void
   stopAll(): void
   toggleMuted(): void

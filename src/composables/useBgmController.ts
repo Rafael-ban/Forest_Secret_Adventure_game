@@ -1,18 +1,24 @@
 import { ref } from 'vue'
-import startBgmSrc from '../assets/audio/bgm-start.mp3'
-import victoryBgmSrc from '../assets/audio/bgm-victory.mp3'
-import failBgmSrc from '../assets/audio/bgm-fail.mp3'
-import type { AudioLike, BgmControllerLike, BgmState, StorageLike } from '../types/game'
+import { bgmSources } from '../data/audio'
+import type { AudioLike, BgmControllerLike, BgmCue, BgmState, StorageLike } from '../types/game'
 
 const STORAGE_KEY = 'forest-secret-adventure-muted'
 
-type TrackName = 'start' | 'victory' | 'fail'
+const LOOPING_CUES = new Set<BgmCue>([
+  'home',
+  'prologue',
+  'departure',
+  'investigation',
+  'revelation',
+  'danger',
+  'finale'
+])
 
 interface CreateBgmControllerOptions {
   storage?: StorageLike
   audioFactory?: (src: string) => AudioLike
-  fadeInMs?: Partial<Record<TrackName, number>>
-  fadeOutMs?: Partial<Record<TrackName, number>>
+  fadeInMs?: Partial<Record<BgmCue, number>>
+  fadeOutMs?: Partial<Record<BgmCue, number>>
 }
 
 function getDefaultStorage(): StorageLike | undefined {
@@ -54,13 +60,13 @@ function fadeVolume(track: AudioLike, target: number, durationMs: number) {
   }, intervalMs)
 }
 
-function getTransitionFadeOutMs(next: TrackName | null) {
-  if (next === 'victory') {
-    return 800
-  }
-
+function getTransitionFadeOutMs(next: BgmCue | null) {
   if (next === 'fail') {
     return 400
+  }
+
+  if (next === 'victory' || next === 'hidden') {
+    return 800
   }
 
   return 500
@@ -73,16 +79,10 @@ export function createBgmController(
   const audioFactory = options.audioFactory ?? getDefaultAudioFactory()
   const audioMuted = ref(storage?.getItem(STORAGE_KEY) === 'true')
   const bgmState = ref<BgmState>('idle')
-  const tracks = new Map<TrackName, AudioLike>()
-  let activeTrack: TrackName | null = null
+  const tracks = new Map<BgmCue, AudioLike>()
+  let activeTrack: BgmCue | null = null
 
-  const sources: Record<TrackName, string> = {
-    start: startBgmSrc,
-    victory: victoryBgmSrc,
-    fail: failBgmSrc
-  }
-
-  function getTrack(name: TrackName) {
+  function getTrack(name: BgmCue) {
     if (!audioFactory) {
       return null
     }
@@ -92,8 +92,8 @@ export function createBgmController(
       return existing
     }
 
-    const track = audioFactory(sources[name])
-    track.loop = name === 'start'
+    const track = audioFactory(bgmSources[name])
+    track.loop = LOOPING_CUES.has(name)
     track.volume = 0
     track.muted = audioMuted.value
     track.currentTime = 0
@@ -107,7 +107,7 @@ export function createBgmController(
     }
   }
 
-  function stopTrack(name: TrackName, fadeOutOverride?: number) {
+  function stopTrack(name: BgmCue, fadeOutOverride?: number) {
     const track = tracks.get(name)
 
     if (!track) {
@@ -123,14 +123,20 @@ export function createBgmController(
     }, fadeOut)
   }
 
-  function playTrack(name: TrackName) {
+  function stopAllTracks() {
+    for (const [name] of tracks) {
+      stopTrack(name, 0)
+    }
+  }
+
+  function playTrack(name: BgmCue) {
     const track = getTrack(name)
 
     if (!track) {
       return
     }
 
-    track.loop = name === 'start'
+    track.loop = LOOPING_CUES.has(name)
     track.muted = audioMuted.value
     track.currentTime = 0
     track.volume = 0
@@ -138,8 +144,13 @@ export function createBgmController(
     fadeVolume(track, 1, options.fadeInMs?.[name] ?? 800)
   }
 
-  function switchTrack(next: TrackName | null) {
-    if (activeTrack && activeTrack !== next) {
+  function switchTrack(next: BgmCue | null) {
+    if (next && activeTrack === next) {
+      bgmState.value = next
+      return
+    }
+
+    if (activeTrack) {
       stopTrack(activeTrack, getTransitionFadeOutMs(next))
     }
 
@@ -157,17 +168,18 @@ export function createBgmController(
   return {
     audioMuted,
     bgmState,
-    startAdventure() {
-      switchTrack('start')
-    },
-    playEnding(kind) {
-      switchTrack(kind)
+    playCue(cue) {
+      switchTrack(cue)
     },
     resetToIdle() {
-      switchTrack(null)
+      stopAllTracks()
+      activeTrack = null
+      bgmState.value = 'idle'
     },
     stopAll() {
-      switchTrack(null)
+      stopAllTracks()
+      activeTrack = null
+      bgmState.value = 'idle'
     },
     toggleMuted() {
       audioMuted.value = !audioMuted.value
@@ -180,13 +192,27 @@ export function createBgmController(
 export function useBgmController() {
   return createBgmController({
     fadeInMs: {
-      start: 1500,
+      home: 1200,
+      prologue: 800,
+      departure: 800,
+      investigation: 800,
+      revelation: 800,
+      danger: 800,
+      finale: 800,
       victory: 800,
+      hidden: 800,
       fail: 400
     },
     fadeOutMs: {
-      start: 500,
+      home: 500,
+      prologue: 500,
+      departure: 500,
+      investigation: 500,
+      revelation: 500,
+      danger: 500,
+      finale: 500,
       victory: 500,
+      hidden: 500,
       fail: 500
     }
   })

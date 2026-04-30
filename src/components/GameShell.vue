@@ -9,14 +9,14 @@
     </div>
 
     <section
-      v-if="!state.hasStarted"
-      class="intro-screen"
+      v-if="state.view === 'home'"
+      class="home-screen"
     >
-      <div class="intro-card">
-        <p class="scene-kicker">{{ introContent.kicker }}</p>
-        <h1>{{ introContent.title }}</h1>
+      <div class="home-copy">
+        <p class="scene-kicker">{{ homeContent.kicker }}</p>
+        <h1>{{ homeContent.title }}</h1>
         <p
-          v-for="paragraph in introContent.body"
+          v-for="paragraph in homeContent.body"
           :key="paragraph"
           class="intro-text"
         >
@@ -26,9 +26,42 @@
           <button
             class="primary-action"
             type="button"
-            @click="startGame"
+            @click="enterPrologue"
           >
-            {{ introContent.buttonLabel }}
+            {{ homeContent.buttonLabel }}
+          </button>
+          <button
+            class="secondary-action"
+            type="button"
+            @click="toggleAudio"
+          >
+            {{ state.audioMuted ? uiText.unmuteLabel : uiText.muteLabel }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section
+      v-else-if="state.view === 'prologue'"
+      class="prologue-screen"
+    >
+      <div class="intro-card">
+        <p class="scene-kicker">{{ prologueContent.kicker }}</p>
+        <h1>{{ prologueContent.title }}</h1>
+        <p
+          v-for="paragraph in prologueContent.body"
+          :key="paragraph"
+          class="intro-text"
+        >
+          {{ paragraph }}
+        </p>
+        <div class="intro-actions">
+          <button
+            class="primary-action"
+            type="button"
+            @click="startAdventure"
+          >
+            {{ prologueContent.buttonLabel }}
           </button>
           <button
             class="secondary-action"
@@ -66,6 +99,9 @@
               :body="currentScene.body"
               :prompt="currentScene.prompt"
               :transition-text="state.transitionText"
+              :progress-label="uiText.progressLabel"
+              :scene-index="sceneIndex"
+              :scene-count="sceneCount"
             />
 
             <ChoiceList
@@ -97,13 +133,17 @@ import { useGameEngine } from '../composables/useGameEngine'
 
 const {
   state,
-  introContent,
+  homeContent,
+  prologueContent,
   currentScene,
   currentEnding,
   activeChoices,
   locationName,
+  sceneIndex,
+  sceneCount,
   uiText,
-  startGame,
+  enterPrologue,
+  startAdventure,
   chooseOption,
   restart,
   exitGame,
@@ -113,16 +153,24 @@ const {
 const scenePresentationKey = computed(() => `${state.currentSceneId}-${state.history.length}`)
 
 const activeImage = computed(() => {
-  if (!state.hasStarted) {
-    return introContent.image
+  if (state.view === 'home') {
+    return homeContent.value.image
+  }
+
+  if (state.view === 'prologue') {
+    return prologueContent.value.image
   }
 
   return currentEnding.value?.image ?? currentScene.value.image
 })
 
 const activeAlt = computed(() => {
-  if (!state.hasStarted) {
-    return introContent.title
+  if (state.view === 'home') {
+    return homeContent.value.title
+  }
+
+  if (state.view === 'prologue') {
+    return prologueContent.value.title
   }
 
   return currentEnding.value?.title ?? currentScene.value.title
