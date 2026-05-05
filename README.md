@@ -1,305 +1,204 @@
-# 森林秘境
+# 森林秘境探险
 
-一个基于 `Vue 3 + Vite + Vitest` 的单页文字选择冒险游戏。  
-当前版本已经重做为一条完整的短篇故事线：你必须在黎明前进入禁林，找到被迷雾引走的姐姐，并决定是强行带她离开，还是修复村庄欠下多年的旧约。
+基于 `Vue 3 + Vite + Vitest` 的交互式文字选择冒险小游戏。玩家在迷雾森林中追寻失踪的姐姐，通过连续分支推进剧情、累积真相线索，并在不同结局间收束第一章故事。
 
-## 1. 当前版本包含什么
+当前版本包含：
 
-- 开场页 + `12` 个连续场景
-- `记忆值` 数值系统，初始值为 `10`
-- `开始 BGM / 胜利 BGM / 失败 BGM`
-- `16` 张全屏插画资源
-- `3` 个结局：失败、普通胜利、隐藏胜利
-- JSON 化剧情配置
-- 自动化流程测试
+- 首页、序章、15 个连续剧情场景
+- 记忆值、线索、森林信任、白鹿与心种等状态判定
+- 10 条分阶段 BGM
+- 章节化 JSON 文案配置
+- 全流程单元测试与构建验证
 
-## 2. 故事背景
+## 环境要求
 
-十年前，村庄为了熬过寒冬，砍伤了森林深处的心树。  
-从那以后，秘境开始用迷雾吞噬人的记忆，向村庄讨还代价。
+- Node.js 20 及以上
+- npm 10 及以上
+- Windows PowerShell 下建议使用 `npm.cmd`
 
-今夜，姐姐带着赎罪的红布条独自进入森林。  
-你必须在天亮前找到她，否则姐姐和村庄都会被这场旧债继续拖下去。
+项目已经通过 [`.npmrc`](./.npmrc) 把 npm 缓存固定到仓库内的 `.npm-cache/`，不会把缓存写到全局默认目录。
 
-## 3. 玩法说明
+## 快速开始
 
-### 3.1 基础规则
-
-- 玩家从开场页点击“进入秘境”后正式开始
-- 初始记忆值：`10/10`
-- 每个场景固定提供 `2` 个选择
-- 冲动、强硬路线更容易失去记忆值
-- 稳妥、理解、救助路线更容易获得线索或信任
-- 记忆值 `<= 0` 时立即进入失败结局
-- 到达最终场景后，根据状态与选择进入不同结局
-
-### 3.2 你会看到的状态
-
-- `记忆值`：当前还能保住多少自我与目标
-- `当前阶段`：你所在的剧情节点
-- `真相线索`：你一路上拼回来的关键事实
-- `静音 / 开声`：控制 BGM
-
-### 3.3 结局类型
-
-- `失败结局`：你没能撑住迷雾与代价
-- `普通胜利`：你救回了姐姐，但森林的旧债没有真正结束
-- `隐藏胜利`：你救回姐姐，也让心树重新接受新的约定
-
-### 3.4 隐藏结局条件
-
-必须同时满足：
-
-1. 在石碑前献出记忆，获得森林初步信任
-2. 全程累计至少 `5` 条真相线索
-3. 在断桥祭坛救下白鹿
-4. 拿到心种
-5. 最终选择“归还心种，承认旧约，请心树停下索债”
-6. 中途没有因记忆值归零而失败
-
-## 4. 运行环境
-
-建议使用：
-
-- `Node.js 20+` 或 `22+`
-- `npm 10+`
-
-这个项目的依赖安装是本地隔离的，不会写到全局环境：
-
-- 依赖安装在当前项目的 `node_modules/`
-- npm 缓存写入当前项目的 `.npm-cache/`
-
-相关配置见 [`.npmrc`]Forest_Secret_Adventure_game/.npmrc)。
-
-## 5. 安装与启动
-
-### 5.1 安装依赖
+安装依赖：
 
 ```powershell
 npm.cmd install
 ```
 
-如果你不是在 PowerShell 中，也可以用：
-
-```bash
-npm install
-```
-
-### 5.2 启动开发服务器
+启动开发服务器：
 
 ```powershell
 npm.cmd run dev
 ```
 
-Vite 默认会输出实际访问地址。通常是：
+默认访问地址：
 
 ```text
-http://127.0.0.1:5173/
+http://127.0.0.1:4173/
 ```
 
-如果端口被占用，Vite 会自动换端口，以终端输出为准。
-
-### 5.3 运行测试
+运行测试：
 
 ```powershell
 npm.cmd run test
 ```
 
-### 5.4 生产构建
+构建生产版本：
 
 ```powershell
 npm.cmd run build
 ```
 
-构建产物输出到 `dist/`。
-
-### 5.5 预览构建结果
+本地预览构建产物：
 
 ```powershell
 npm.cmd run preview
 ```
 
-## 6. 项目结构
+## 目录结构
 
 ```text
 Forest_Secret_Adventure_game/
 ├─ src/
 │  ├─ assets/
-│  │  ├─ audio/               BGM 文件
-│  │  └─ images/              场景与结局插画
-│  ├─ components/             页面组件
-│  ├─ composables/            游戏逻辑与音频控制
-│  ├─ data/                   剧情文本与图片映射
-│  ├─ types/                  类型定义
+│  │  ├─ audio/          所有正式使用的 BGM
+│  │  └─ images/         场景与结局插图
+│  ├─ components/        页面与交互组件
+│  ├─ composables/       游戏状态机与 BGM 控制器
+│  ├─ data/              音频映射与剧情配置
+│  ├─ types/             TypeScript 类型
 │  ├─ App.vue
 │  ├─ main.ts
 │  └─ styles.css
-├─ .npm-cache/                本地 npm 缓存
-├─ node_modules/              本地依赖
-├─ dist/                      构建输出
+├─ docs/
 ├─ package.json
 ├─ tsconfig.json
 ├─ vite.config.ts
 └─ vitest.config.ts
 ```
 
-## 7. 关键文件说明
+## 剧情与配置入口
 
-- [`src/data/story-content.json`](Forest_Secret_Adventure_game/src/data/story-content.json)  
-  全部剧情文案、章节结构、选项文案、过场文案、结局文案和 UI 文案都在这里。当前已经按 `chapters.chapter1` 分层，后续加第二章时直接扩这一层。
+主要内容都在这几个文件里：
 
-- [`src/data/story.ts`](Forest_Secret_Adventure_game/src/data/story.ts)  
-  把 JSON 文案和图片资源组合成前端可直接消费的内容对象。
+- [`src/data/story-content.json`](./src/data/story-content.json)
+  - 首页文案
+  - 序章文案
+  - 场景顺序
+  - 每个场景的正文、提示、选项、效果
+  - 结局文案
+  - UI 文案
+- [`src/data/story.ts`](./src/data/story.ts)
+  - 把 JSON 数据整理成运行时可用结构
+  - 场景图片与结局图片映射
+- [`src/composables/useGameEngine.ts`](./src/composables/useGameEngine.ts)
+  - 游戏主状态
+  - 选项执行
+  - 数值与结局判定
+  - 页面切换与 BGM 触发
+- [`src/composables/useBgmController.ts`](./src/composables/useBgmController.ts)
+  - 音轨切换
+  - 淡入淡出
+  - 静音状态持久化
 
-- [`src/composables/useGameEngine.ts`](Forest_Secret_Adventure_game/src/composables/useGameEngine.ts)  
-  游戏核心状态机。包括记忆值变化、场景跳转、线索累计、隐藏结局判定、重开与退出重置。
+## 音频资源规范
 
-- [`src/composables/useBgmController.ts`](Forest_Secret_Adventure_game/src/composables/useBgmController.ts)  
-  控制 `开始 / 胜利 / 失败` 三段 BGM 的播放、淡入淡出和静音持久化。
-
-- [`src/components/GameShell.vue`](Forest_Secret_Adventure_game/src/components/GameShell.vue)  
-  主界面容器，负责在开场页、场景页和结局弹层之间切换。
-
-- [`src/composables/useGameEngine.test.ts`](Forest_Secret_Adventure_game/src/composables/useGameEngine.test.ts)  
-  剧情流程测试。
-
-- [`src/composables/useBgmController.test.ts`](Forest_Secret_Adventure_game/src/composables/useBgmController.test.ts)  
-  BGM 控制测试。
-
-## 8. 音频资源如何替换
-
-当前项目默认读取这三个文件：
-
-- [`src/assets/audio/bgm-start.mp3`](Forest_Secret_Adventure_game/src/assets/audio/bgm-start.mp3)
-- [`src/assets/audio/bgm-victory.mp3`](Forest_Secret_Adventure_game/src/assets/audio/bgm-victory.mp3)
-- [`src/assets/audio/bgm-fail.mp3`](Forest_Secret_Adventure_game/src/assets/audio/bgm-fail.mp3)
-
-替换方式很直接：
-
-1. 保持文件名不变
-2. 用你自己的音频覆盖同名文件
-3. 重新运行 `npm.cmd run dev` 或 `npm.cmd run build`
-
-当前播放规则：
-
-- 点击“进入秘境”后开始播放 `bgm-start`
-- 普通胜利与隐藏胜利切到 `bgm-victory`
-- 失败结局切到 `bgm-fail`
-- 静音状态会保存到 `localStorage`
-
-## 9. 图片资源如何替换
-
-当前项目的插画都在 [`src/assets/images`](Forest_Secret_Adventure_game/src/assets/images) 下，包含：
-
-- `1` 张开场图
-- `12` 张场景图
-- `3` 张结局图
-
-实际文件映射以 [`src/data/story.ts`](Forest_Secret_Adventure_game/src/data/story.ts) 为准。
-
-如果你要换图：
-
-1. 保持文件名不变，直接替换文件
-2. 或者改 [`src/data/story.ts`](Forest_Secret_Adventure_game/src/data/story.ts) 中的 import 与映射
-
-## 10. 如何修改剧情文案
-
-直接编辑 [`src/data/story-content.json`](Forest_Secret_Adventure_game/src/data/story-content.json)。
-
-最常改的几个区域：
-
-- `chapters.chapter1.intro`：开场页标题、导语、按钮
-- `chapters.chapter1.sceneOrder`：当前章节的场景顺序
-- `chapters.chapter1.scenes.scene1` 到 `chapters.chapter1.scenes.scene12`：场景正文与选项
-- `chapters.chapter1.transitions`：每次选择后的过场反馈
-- `chapters.chapter1.endings`：三个结局文案
-- `ui`：按钮、状态栏、弹层文案
-
-当前每个选项除了文案，还带有 `effect` 配置。这里定义：
-
-- 跳转到哪个场景
-- 扣减或恢复多少记忆值
-- 是否增加真相线索
-- 是否获得森林信任 / 白鹿 / 心种
-- 是否直接进入某个结局
-- 是否走动态规则，例如沼泽试路和最终修约判定
-
-如果后续要扩第二章，直接新增：
-
-```json
-"chapters": {
-  "chapter1": { "...": "..." },
-  "chapter2": { "...": "..." }
-}
-```
-
-### 10.1 修改选项时要注意
-
-- 只改 `label` 很安全
-- `id` 不要随便改
-- 如果改了 `id`，必须同步修改 [`src/composables/useGameEngine.ts`](Forest_Secret_Adventure_game/src/composables/useGameEngine.ts) 里的分支逻辑
-
-### 10.2 文案占位符
-
-当前文案支持这些占位符：
+所有正式使用的音频文件统一放在：
 
 ```text
-{memory}
-{maxMemory}
-{clues}
+src/assets/audio/
 ```
 
-例如：
+当前 BGM 映射如下：
+
+| Cue | 用途 | 文件 |
+| --- | --- | --- |
+| `home` | 首页 | `domartistudios-magic-forest-473582.mp3` |
+| `prologue` | 序章 / 开始前夜 | `syouki_takahashi-midnight-forest-184304.mp3` |
+| `departure` | 出发与早期推进 | `deuslower-fantasy-medieval-mystery-ambient-292418.mp3` |
+| `investigation` | 调查与辨认线索 | `ovrsoull-dark-ambient-cinematic-drone-investigative-pulse-minimalist-tension-454723.mp3` |
+| `revelation` | 真相逐步显现 | `romansenykmusic-cinematic-fantasy-dark-160932.mp3` |
+| `danger` | 高风险场景 | `wbmstudio-dramatic-tension-dark-cinematic-tension-467871.mp3` |
+| `finale` | 终局区域 | `sigmaeffect-cinematic-dark-tension-atmosphere-464380.mp3` |
+| `victory` | 普通胜利 | `paulyudin-hopeful-piano-emotional-158606.mp3` |
+| `hidden` | 隐藏胜利 | `royaltyfreemusicstudio-hopeful-cinematic-journey-506057.mp3` |
+| `fail` | 失败结局 | `megalix-dark-ambient-for-crime-and-tension-360762.mp3` |
+
+音频映射定义在 [`src/data/audio.ts`](./src/data/audio.ts)。后续如果替换音频文件，保持文件放在 `src/assets/audio/` 并同步更新映射即可。
+
+## 图片资源规范
+
+所有正式使用的图片统一放在：
 
 ```text
-你的记忆值：{memory}/{maxMemory}
-真相线索：{clues}
+src/assets/images/
 ```
 
-运行时会替换成实时状态。
+场景与结局图片映射由 [`src/data/story.ts`](./src/data/story.ts) 管理。新增图片时，先放入目录，再把映射补齐。
 
-## 11. 如何修改规则
+## 测试与构建检查
 
-如果是改玩法、数值或结局条件，主要改这个文件：
+这个项目至少要通过两类检查：
 
-- [`src/composables/useGameEngine.ts`](Forest_Secret_Adventure_game/src/composables/useGameEngine.ts)
+1. 逻辑测试
 
-常见修改点：
+```powershell
+npm.cmd run test
+```
 
-- 初始记忆值：`MAX_MEMORY`
-- 某个选项的 `choices[].effect.memoryDelta`
-- 哪些选择会增加 `choices[].effect.truthClueDelta`
-- 哪些选择会设置 `setTrustForest / setSavedWhiteDeer / setHasHeartSeed`
-- 动态规则 `swamp_follow_lights` 和 `final_pact_resolution`
+覆盖内容包括：
+
+- 游戏主流程
 - 隐藏结局条件
-- 退出和重开的状态重置
+- 失败与普通胜利收敛
+- BGM 控制器切换、循环与静音持久化
+- 音频映射完整性
 
-改完规则后，建议立刻运行：
+2. 构建检查
 
 ```powershell
-npm.cmd run test
+npm.cmd run build
 ```
 
-## 12. 自动化测试覆盖了什么
+这一步会直接验证：
 
-当前测试覆盖这些核心点：
+- 图片路径是否可解析
+- 音频路径是否可解析
+- Vite 是否能正确打包所有静态资源
 
-- 开场前不播放 BGM
-- 点击“进入秘境”后进入 `start` BGM
-- 理解真相路线会累计线索
-- 救白鹿后会拿到心种
-- 失败路线会切到失败结局和失败 BGM
-- 满足隐藏条件时会进入隐藏胜利
-- 条件不足时会从修复旧约降级到普通胜利或失败
-- `restart()` 会重置整局状态
-- `exitGame()` 会回到干净的开场状态
-- 静音会写入并恢复 `localStorage`
+如果音频文件移动后路径写错，通常会在构建阶段直接暴露，而不是拖到线上才发现。
 
-## 13. 常见问题
+## GitHub Pages 部署
 
-### Q1：为什么我在 PowerShell 里运行 `npm` 报执行策略错误？
+项目使用 GitHub Actions 部署 Pages，工作流文件是：
 
-直接用 `npm.cmd`：
+- [`.github/workflows/deploy-pages.yml`](./.github/workflows/deploy-pages.yml)
+
+关键点：
+
+- `Settings -> Pages -> Source` 必须选择 `GitHub Actions`
+- 不要把源码目录直接当静态站点发布
+- Vite 会在构建阶段生成 `dist/`
+- Pages 应该发布 `dist/` 产物，而不是仓库根目录的 `index.html`
+
+如果线上空白页，同时页面源码里看到：
+
+```html
+<script type="module" src="/src/main.ts"></script>
+```
+
+说明你发布的是源码入口，而不是构建产物。正确的生产资源路径应该类似：
+
+```text
+/Forest_Secret_Adventure_game/assets/index-xxxx.js
+```
+
+## 常见问题
+
+### 1. PowerShell 下 `npm` 命令行为不稳定
+
+优先使用：
 
 ```powershell
 npm.cmd install
@@ -308,40 +207,33 @@ npm.cmd run test
 npm.cmd run build
 ```
 
-### Q2：为什么点开页面后没有立刻播放音乐？
+### 2. 页面没有音乐
 
-这是浏览器自动播放限制。  
-必须等玩家点击“进入秘境”之后，页面才能合法开始播放 BGM。
+先检查三件事：
 
-### Q3：我只想改文字，不想碰 TypeScript，改哪里？
+- 浏览器是否拦截了自动播放
+- 是否点过触发播放的按钮
+- [`src/data/audio.ts`](./src/data/audio.ts) 对应的文件是否仍存在于 `src/assets/audio/`
 
-直接改 [`src/data/story-content.json`](Forest_Secret_Adventure_game/src/data/story-content.json)。
+### 3. 构建时报音频路径错误
 
-### Q4：我换了图片和音频之后，还要做什么？
+检查：
 
-至少跑这两条命令确认没有资源引用问题：
+- `src/assets/audio/` 中目标文件是否存在
+- 文件名是否和 [`src/data/audio.ts`](./src/data/audio.ts) 完全一致
+- 是否误把音频重新放回了根目录 `music/`
 
-```powershell
-npm.cmd run test
-npm.cmd run build
-```
+### 4. 修改剧情后选项不生效
 
-## 14. 推荐接手顺序
+优先检查 [`src/data/story-content.json`](./src/data/story-content.json)：
 
-如果你第一次接这个项目，建议按这个顺序看：
+- `choice.id` 是否唯一
+- `effect.transitionKey` 是否存在于 `transitions`
+- `nextSceneId`、`endingId`、`endingReason` 是否匹配当前类型定义
 
-1. 先跑起来，手动玩一遍
-2. 看 [`src/data/story-content.json`](Forest_Secret_Adventure_game/src/data/story-content.json)
-3. 看 [`src/composables/useGameEngine.ts`](Forest_Secret_Adventure_game/src/composables/useGameEngine.ts)
-4. 看 [`src/composables/useBgmController.ts`](Forest_Secret_Adventure_game/src/composables/useBgmController.ts)
-5. 运行测试
-6. 再开始改剧情或规则
+## 开发建议
 
-推荐命令：
-
-```powershell
-npm.cmd install
-npm.cmd run dev
-npm.cmd run test
-npm.cmd run build
-```
+- 先改 JSON 文案，再改状态机逻辑
+- 改完剧情或音频映射后，至少跑一次测试和一次构建
+- 不要在仓库里同时保留两套同用途音频目录
+- 资源路径问题优先通过构建验证，不要等线上排查
